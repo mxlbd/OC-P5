@@ -22,23 +22,23 @@ function retrieveItems() {
 function displayItem(item) {
   const article = itemArticle(item);
 
-  const divGFOne = divGF1(item);
-  article.appendChild(divGFOne);
+  const dvImg = divImage(item);
+  article.appendChild(dvImg);
 
-  const divGFTwo = divGF2(item);
-  article.appendChild(divGFTwo);
+  const dvContent = divContent(item);
+  article.appendChild(dvContent);
 
-  const divFOne = divF1(item);
-  divGFTwo.appendChild(divFOne);
+  const dvDescription = divDescription(item);
+  dvContent.appendChild(dvDescription);
 
-  const divFTwo = divF2();
-  divGFTwo.appendChild(divFTwo);
+  const dvSettings = divSettings();
+  dvContent.appendChild(dvSettings);
 
-  const divCOne = divC1(item);
-  divFTwo.appendChild(divCOne);
+  const dvQuantity = divQuantity(item);
+  dvSettings.appendChild(dvQuantity);
 
-  const divCTwo = divC2();
-  divFTwo.appendChild(divCTwo);
+  const dvDelete = divDelete(item);
+  dvSettings.appendChild(dvDelete);
 
   displayTotalQuantity();
   displayTotalPrice();
@@ -77,35 +77,35 @@ function itemArticle(item) {
 
   return article;
 }
-// Première Div (Grand Father 1) --------------------------------
+// Div Image --------------------------------
 
-function divGF1(item) {
-  const divGrandFather1 = document.createElement('div');
-  divGrandFather1.classList.add('cart__item__img');
+function divImage(item) {
+  const divImage = document.createElement('div');
+  divImage.classList.add('cart__item__img');
 
   const img = document.createElement('img');
   img.src = item.imageUrl;
   img.alt = item.altTxt;
 
-  divGrandFather1.appendChild(img);
+  divImage.appendChild(img);
 
-  return divGrandFather1;
+  return divImage;
 }
 
-// Deuxième Div (Grand father 2) --------------------------------
+// Div Content --------------------------------
 
-function divGF2() {
-  const divGrandFather2 = document.createElement('div');
-  divGrandFather2.classList.add('cart__item__content');
+function divContent() {
+  const divContent = document.createElement('div');
+  divContent.classList.add('cart__item__content');
 
-  return divGrandFather2;
+  return divContent;
 }
 
-// Première Div (Father 1) --------------------------------------
+// Div Description --------------------------------------
 
-function divF1(item) {
-  const divFather1 = document.createElement('div');
-  divFather1.classList.add('cart__item__content__description');
+function divDescription(item) {
+  const divDescription = document.createElement('div');
+  divDescription.classList.add('cart__item__content__description');
 
   const name = document.createElement('h2');
   name.textContent = item.name;
@@ -114,27 +114,27 @@ function divF1(item) {
   const price = document.createElement('p');
   price.textContent = item.price + ' €';
 
-  divFather1.appendChild(name);
-  divFather1.appendChild(color);
-  divFather1.appendChild(price);
+  divDescription.appendChild(name);
+  divDescription.appendChild(color);
+  divDescription.appendChild(price);
 
-  return divFather1;
+  return divDescription;
 }
 
-// Deuxième Div (Father 2) --------------------------------------
+// Div Settings -----------------------------------------------
 
-function divF2() {
-  const divFather2 = document.createElement('div');
-  divFather2.classList.add('cart__item__content__settings');
+function divSettings() {
+  const divSettings = document.createElement('div');
+  divSettings.classList.add('cart__item__content__settings');
 
-  return divFather2;
+  return divSettings;
 }
 
-// Première Div (Child 1) ---------------------------------------
+// Div Quantity ---------------------------------------
 
-function divC1(item) {
-  const divChild1 = document.createElement('div');
-  divChild1.classList.add('cart__item__content__settings__quantity');
+function divQuantity(item) {
+  const divQuantity = document.createElement('div');
+  divQuantity.classList.add('cart__item__content__settings__quantity');
 
   const paragraph = document.createElement('p');
   paragraph.innerHTML = 'Qté : ';
@@ -146,24 +146,70 @@ function divC1(item) {
   input.min = '1';
   input.max = '100';
   input.value = item.quantity;
+  input.addEventListener('input', () =>
+    updateQuantity(item.id, input.value, item)
+  );
 
-  divChild1.appendChild(paragraph);
-  divChild1.appendChild(input);
+  divQuantity.appendChild(paragraph);
+  divQuantity.appendChild(input);
 
-  return divChild1;
+  return divQuantity;
 }
 
-// Deuxième Div (Child 2) --------------------------------------
+// Mettre à jour les quantités à chaque changement dans le panier
 
-function divC2() {
-  const divChild2 = document.createElement('div');
-  divChild2.classList.add('cart__item__content__settings__delete');
+function updateQuantity(id, newValue, item) {
+  const updateItem = cart.find((item) => item.id === id);
+  updateItem.quantity = Number(newValue);
+  displayTotalPrice();
+  displayTotalQuantity();
+  updateCache(item);
+}
+
+// Sauvegarder les nouvelles données dans le cache
+
+function updateCache(item) {
+  const newData = JSON.stringify(item);
+  localStorage.setItem(item.id + '-' + item.color, newData);
+}
+
+// Div Delete --------------------------------------
+
+function divDelete(item) {
+  const divDelete = document.createElement('div');
+  divDelete.classList.add('cart__item__content__settings__delete');
+
+  divDelete.addEventListener('click', () => deleteItem(item));
 
   const paragraph = document.createElement('p');
   paragraph.classList.add('deleteItem');
   paragraph.textContent = 'Supprimer';
 
-  divChild2.appendChild(paragraph);
+  divDelete.appendChild(paragraph);
 
-  return divChild2;
+  return divDelete;
+}
+
+// Fonction pour supprimer un article du cache -----------------
+
+function deleteItem(item) {
+  const deleteItem = cart.find(
+    (product) => product.id === item.id && product.color === item.color
+  );
+  cart.splice(deleteItem, 1);
+  displayTotalQuantity();
+  displayTotalPrice();
+  deleteCache(item);
+  deleteArticle(item);
+}
+
+function deleteCache(item) {
+  localStorage.removeItem(item.id + '-' + item.color);
+}
+
+function deleteArticle(item) {
+  const deleteArticle = document.querySelector(
+    `article[data-id="${item.id}"][data-color="${item.color}"]`
+  );
+  deleteArticle.remove();
 }
