@@ -7,6 +7,9 @@ retrieveItems();
 
 cart.forEach((item) => displayItem(item));
 
+const orderButton = document.querySelector('#order');
+orderButton.addEventListener('click', (e) => submitForm(e));
+
 // Récupère les informations du localStorage --------------------------
 
 function retrieveItems() {
@@ -212,4 +215,51 @@ function deleteArticle(item) {
     `article[data-id="${item.id}"][data-color="${item.color}"]`
   );
   deleteArticle.remove();
+}
+
+// Envoi du formulaire au backend au clic du bouton commander -------------
+
+function submitForm(e) {
+  e.preventDefault();
+
+  if (cart.length === 0) {
+    alert('Veuillez selectionner au moins un article avant de passer commande');
+    return;
+  }
+
+  const body = requestBody();
+
+  const post = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  fetch('http://localhost:3000/api/products/order', post)
+    .then((res) => res.json())
+    .then((data) => console.log(data));
+}
+
+// Corps du formulaire -------------------------------------
+
+function requestBody() {
+  const form = document.querySelector('.cart__order__form');
+
+  const firstName = form.elements.firstName.value;
+  const lastName = form.elements.lastName.value;
+  const adress = form.elements.address.value;
+  const city = form.elements.city.value;
+  const email = form.elements.email.value;
+
+  const body = {
+    contact: {
+      firstName: firstName,
+      lastName: lastName,
+      adress: adress,
+      city: city,
+      email: email,
+    },
+    products: ['productId'],
+  };
+  return body;
 }
