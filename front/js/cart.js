@@ -227,17 +227,90 @@ function submitForm(e) {
     return;
   }
 
-  const body = requestBody();
+  if (firstNameInvalid()) return;
+  if (lastNameInvalid()) return;
+  if (addressInvalid()) return;
+  if (cityInvalid()) return;
+  if (emailInvalid()) return;
 
-  const post = {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json' },
-  };
+  // const body = requestBody();
 
-  fetch('http://localhost:3000/api/products/order', post)
-    .then((res) => res.json())
-    .then((data) => console.log(data));
+  // fetch('http://localhost:3000/api/products/order', {
+  //   method: 'POST',
+  //   body: JSON.stringify(body),
+  //   headers: { 'Content-Type': 'application/json' },
+  // })
+  //   .then((res) => res.json())
+  //   .then((data) => {
+  //     const orderId = data.orderId;
+  //     window.location.href = '/html/confirmation.html' + '?orderId=' + orderId;
+  //   })
+  //   .catch((err) => console.error(err));
+}
+
+// véfirication du formulaire ------------------------------
+
+function firstNameInvalid() {
+  const regex = /^[a-zA-Z-]+$/;
+  const firstName = document.querySelector('#firstName');
+  console.log(regex.test(firstName.value));
+
+  if (regex.test(firstName.value) == false) {
+    firstName.nextElementSibling.textContent =
+      'Doit contenir uniquement des lettres';
+    return;
+  }
+}
+
+function lastNameInvalid() {
+  const regex = /^[a-zA-Z-]+$/;
+  const lastName = document.querySelector('#lastName');
+  console.log(regex.test(lastName.value));
+
+  if (regex.test(lastName.value) == false) {
+    lastName.nextElementSibling.textContent =
+      'Doit contenir uniquement des lettres';
+    return;
+  }
+}
+
+function addressInvalid() {
+  const regex = /^[#.0-9a-zA-Z\s,-]+$/;
+  const address = document.querySelector('#address');
+  console.log(regex.test(address.value));
+
+  if (regex.test(address.value) == false) {
+    address.nextElementSibling.textContent =
+      'Doit contenir uniquement des chiffres et des lettres';
+    return;
+  }
+}
+
+function cityInvalid() {
+  const regex = /^[a-zA-Z-]+$/;
+  const city = document.querySelector('#city');
+  console.log(regex.test(city.value));
+
+  if (regex.test(city.value) == false) {
+    city.nextElementSibling.textContent =
+      'Doit contenir uniquement des lettres, sans caractères spéciaux';
+    return false;
+  }
+  return true;
+}
+
+// Vérification si l'email est valide ----------------------
+
+function emailInvalid() {
+  const regex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
+  const email = document.querySelector('#email');
+  console.log(regex.test(email.value));
+
+  if (regex.test(email.value) == false) {
+    email.nextElementSibling.textContent = 'Renseigner un email valide';
+    return false;
+  }
+  return true;
 }
 
 // Corps du formulaire -------------------------------------
@@ -247,7 +320,7 @@ function requestBody() {
 
   const firstName = form.elements.firstName.value;
   const lastName = form.elements.lastName.value;
-  const adress = form.elements.address.value;
+  const address = form.elements.address.value;
   const city = form.elements.city.value;
   const email = form.elements.email.value;
 
@@ -255,11 +328,24 @@ function requestBody() {
     contact: {
       firstName: firstName,
       lastName: lastName,
-      adress: adress,
+      address: address,
       city: city,
       email: email,
     },
-    products: ['productId'],
+    products: idsToCache(),
   };
   return body;
+}
+
+// Donne à requestBody tous les ids du panier --------------
+
+function idsToCache() {
+  const numberItems = localStorage.length;
+  const ids = [];
+  for (let i = 0; i < numberItems; i++) {
+    const key = localStorage.key(i);
+    const id = key.split('-')[0];
+    ids.push(id);
+  }
+  return ids;
 }
