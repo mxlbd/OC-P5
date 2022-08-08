@@ -1,5 +1,4 @@
 const id = new URLSearchParams(document.location.search).get('id');
-let numberPrice = 0;
 let altText;
 let imgUrl;
 let nameSofa;
@@ -13,7 +12,6 @@ function main(data) {
   itemImg(imageUrl, altTxt);
   document.querySelector('#title').textContent = name;
   document.querySelector('#price').textContent = price;
-  numberPrice = price;
   document.querySelector('#description').textContent = description;
   colorSelect(colors);
   altText = altTxt;
@@ -56,14 +54,15 @@ function buttonAddToCart() {
       alert('Veuillez choissir une quantité et une couleur');
     } else {
       const data = {
-        id: id,
+        _id: id,
         color: color,
         quantity: Number(quantity),
-        price: numberPrice,
         imageUrl: imgUrl,
         altTxt: altText,
         name: nameSofa,
       };
+      console.log(data);
+      console.log(JSON.stringify(data));
       localStorage.setItem(id + '-' + color, JSON.stringify(data));
       window.location.href = 'cart.html';
     }

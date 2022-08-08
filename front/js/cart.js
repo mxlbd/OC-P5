@@ -1,16 +1,7 @@
-// Stocker les informations du localStorage ---------------------------
+// Récupère les informations du localStorage --------------------------
 const cart = [];
 
 retrieveItems();
-
-// Défini une boucle pour appliquer le code à tous les articles -------
-
-cart.forEach((item) => displayItem(item));
-
-const orderButton = document.querySelector('#order');
-orderButton.addEventListener('click', (e) => submitForm(e));
-
-// Récupère les informations du localStorage --------------------------
 
 function retrieveItems() {
   for (let i = 0; i < localStorage.length; i++) {
@@ -20,204 +11,200 @@ function retrieveItems() {
   }
 }
 
-// Affiche le code HTML -----------------------------------------------
+fetch(`http://localhost:3000/api/products/`)
+  .then((response) => response.json())
+  .then((data) => retreiveItemsAndPrice(data));
 
-function displayItem(item) {
-  const article = itemArticle(item);
-
-  const dvImg = divImage(item);
-  article.appendChild(dvImg);
-
-  const dvContent = divContent(item);
-  article.appendChild(dvContent);
-
-  const dvDescription = divDescription(item);
-  dvContent.appendChild(dvDescription);
-
-  const dvSettings = divSettings();
-  dvContent.appendChild(dvSettings);
-
-  const dvQuantity = divQuantity(item);
-  dvSettings.appendChild(dvQuantity);
-
-  const dvDelete = divDelete(item);
-  dvSettings.appendChild(dvDelete);
-
-  displayTotalQuantity();
-  displayTotalPrice();
+const itemAndPrice = [];
+function retreiveItemsAndPrice(data) {
+  for (let i = 0; i < cart.length; i++) {
+    for (let j = 0; j < data.length; j++) {
+      if (cart[i]._id === data[j]._id) {
+        const itemObjectAndPrice = {
+          id: cart[i]._id,
+          color: cart[i].color,
+          quantity: cart[i].quantity,
+          imageUrl: cart[i].imageUrl,
+          altTxt: cart[i].altTxt,
+          name: cart[i].name,
+          price: data[j].price,
+        };
+        itemAndPrice.push(itemObjectAndPrice);
+      }
+    }
+  }
+  itemAndPrice.forEach((item) => {
+    displayItems(item);
+  });
 }
 
-// Faire apparaître la quantité total des articles -----------------
+function displayItems(item) {
+  const article = elementArticle(item);
+  const img = elementImg(item);
+  article.appendChild(img);
+
+  const content = elementContent();
+  article.appendChild(content);
+
+  const description = elementDescription(item);
+  content.appendChild(description);
+
+  const settings = elementSettings();
+  content.appendChild(settings);
+
+  const quantity = elementQuantity(item);
+  settings.appendChild(quantity);
+
+  const deleteItem = elementDelete(item);
+  settings.appendChild(deleteItem);
+
+  displayTotalQuantity();
+  displayTotalPrice(item);
+}
 
 function displayTotalQuantity() {
   const totalQuantity = document.querySelector('#totalQuantity');
-  const total = cart.reduce((total, item) => total + item.quantity, 0);
-
-  totalQuantity.innerHTML = total;
+  let total = 0;
+  for (let i = 0; i < cart.length; i++) {
+    console.log(cart[i]);
+    total += cart[i].quantity;
+  }
+  totalQuantity.textContent = total;
 }
 
-// Faire apparaître le prix total des articles ---------------------
-
 function displayTotalPrice() {
-  let total = 0;
   const totalPrice = document.querySelector('#totalPrice');
-  cart.forEach((item) => {
-    const totalUnitPrice = item.price * item.quantity;
-    total = total + totalUnitPrice;
-  });
+  let total = 0;
+  for (let i = 0; i < itemAndPrice.length; i++) {
+    total += itemAndPrice[i].price * itemAndPrice[i].quantity;
+  }
   totalPrice.textContent = total;
 }
 
-// Article ---------------------------------------------------------
-
-function itemArticle(item) {
+function elementArticle(item) {
   const article = document
     .querySelector('#cart__items')
     .appendChild(document.createElement('article'));
   article.classList.add('cart__item');
-  article.dataset.id = item.id;
-  article.dataset.color = item.color;
-
+  article.setAttribute('data-id', item.id);
+  article.setAttribute('data-color', item.color);
   return article;
 }
-// Div Image --------------------------------
 
-function divImage(item) {
-  const divImage = document.createElement('div');
-  divImage.classList.add('cart__item__img');
-
+function elementImg(item) {
+  const div = document.createElement('div');
   const img = document.createElement('img');
+  div.appendChild(img);
+
+  div.classList.add('cart__item__img');
   img.src = item.imageUrl;
   img.alt = item.altTxt;
-
-  divImage.appendChild(img);
-
-  return divImage;
+  return div;
 }
 
-// Div Content --------------------------------
+// altTxt: "Photo d'un canapé bleu, deux places"
+// color: "Blue"
+// id: "107fb5b75607497b96722bda5b504926"
+// imageUrl: "http://localhost:3000/images/kanap01.jpeg"
+// name: "Kanap Sinopé"
+// price: 1849
+// quantity: 1
 
-function divContent() {
-  const divContent = document.createElement('div');
-  divContent.classList.add('cart__item__content');
-
-  return divContent;
+function elementContent() {
+  const div = document.createElement('div');
+  div.classList.add('cart__item__content');
+  return div;
 }
 
-// Div Description --------------------------------------
+function elementDescription(item) {
+  const div = document.createElement('div');
+  div.classList.add('cart__item__content__description');
+  const h2 = document.createElement('h2');
+  h2.textContent = item.name;
+  const p1 = document.createElement('p');
+  p1.textContent = item.color;
+  const p2 = document.createElement('p');
+  p2.textContent = item.price + ' €';
 
-function divDescription(item) {
-  const divDescription = document.createElement('div');
-  divDescription.classList.add('cart__item__content__description');
+  div.appendChild(h2);
+  div.appendChild(p1);
+  div.appendChild(p2);
 
-  const name = document.createElement('h2');
-  name.textContent = item.name;
-  const color = document.createElement('p');
-  color.textContent = item.color;
-  const price = document.createElement('p');
-  price.textContent = item.price + ' €';
-
-  divDescription.appendChild(name);
-  divDescription.appendChild(color);
-  divDescription.appendChild(price);
-
-  return divDescription;
+  return div;
 }
 
-// Div Settings -----------------------------------------------
-
-function divSettings() {
-  const divSettings = document.createElement('div');
-  divSettings.classList.add('cart__item__content__settings');
-
-  return divSettings;
+function elementSettings() {
+  const div = document.createElement('div');
+  div.classList.add('cart__item__content__settings');
+  return div;
 }
 
-// Div Quantity ---------------------------------------
-
-function divQuantity(item) {
-  const divQuantity = document.createElement('div');
-  divQuantity.classList.add('cart__item__content__settings__quantity');
-
-  const paragraph = document.createElement('p');
-  paragraph.innerHTML = 'Qté : ';
-
+function elementQuantity(item) {
+  const div = document.createElement('div');
+  div.classList.add('cart__item__content__settings__quantity');
+  const p = document.createElement('p');
+  p.textContent = 'Qté : ';
   const input = document.createElement('input');
-  input.type = 'number';
   input.classList.add('itemQuantity');
+  input.type = 'number';
   input.name = 'itemQuantity';
   input.min = '1';
   input.max = '100';
   input.value = item.quantity;
+  div.appendChild(p);
+  div.appendChild(input);
+
   input.addEventListener('input', () =>
     updateQuantity(item.id, input.value, item)
   );
 
-  divQuantity.appendChild(paragraph);
-  divQuantity.appendChild(input);
-
-  return divQuantity;
+  return div;
 }
 
-// Mettre à jour les quantités à chaque changement dans le panier
+function updateQuantity(id, newQuantity, item) {
+  const itemToUpdate = itemAndPrice.find((item) => item.id === id);
+  itemToUpdate.quantity = Number(newQuantity);
 
-function updateQuantity(id, newValue, item) {
-  const updateItem = cart.find((item) => item.id === id);
-  updateItem.quantity = Number(newValue);
-  displayTotalPrice();
+  const newItem = {
+    altTxt: itemToUpdate.altTxt,
+    color: itemToUpdate.color,
+    _id: itemToUpdate.id,
+    imageUrl: itemToUpdate.imageUrl,
+    name: itemToUpdate.name,
+    quantity: itemToUpdate.quantity,
+  };
+
+  localStorage.setItem(id + '-' + item.color, JSON.stringify(newItem));
   displayTotalQuantity();
-  updateCache(item);
+  displayTotalPrice(item);
+  location.reload();
 }
 
-// Sauvegarder les nouvelles données dans le cache
-
-function updateCache(item) {
-  const newData = JSON.stringify(item);
-  localStorage.setItem(item.id + '-' + item.color, newData);
+function elementDelete(item) {
+  const div = document.createElement('div');
+  div.classList.add('cart__item__content__settings__delete');
+  div.addEventListener('click', () => deleteItem(item));
+  const p = document.createElement('p');
+  p.classList.add('deleteItem');
+  p.textContent = 'Supprimer';
+  div.appendChild(p);
+  return div;
 }
-
-// Div Delete --------------------------------------
-
-function divDelete(item) {
-  const divDelete = document.createElement('div');
-  divDelete.classList.add('cart__item__content__settings__delete');
-
-  divDelete.addEventListener('click', () => deleteItem(item));
-
-  const paragraph = document.createElement('p');
-  paragraph.classList.add('deleteItem');
-  paragraph.textContent = 'Supprimer';
-
-  divDelete.appendChild(paragraph);
-
-  return divDelete;
-}
-
-// Fonction pour supprimer un article du cache -----------------
 
 function deleteItem(item) {
-  const deleteItem = cart.find(
-    (product) => product.id === item.id && product.color === item.color
+  const deleteItem = item;
+  const article = document.querySelector(
+    `article[data-id="${deleteItem.id}"][data-color="${deleteItem.color}"]`
   );
-  cart.splice(deleteItem, 1);
-  displayTotalQuantity();
-  displayTotalPrice();
-  deleteCache(item);
-  deleteArticle(item);
-}
-
-function deleteCache(item) {
-  localStorage.removeItem(item.id + '-' + item.color);
-}
-
-function deleteArticle(item) {
-  const deleteArticle = document.querySelector(
-    `article[data-id="${item.id}"][data-color="${item.color}"]`
-  );
-  deleteArticle.remove();
+  article.remove();
+  localStorage.removeItem(`${deleteItem.id}-${deleteItem.color}`);
+  location.reload();
 }
 
 // Envoi du formulaire au backend au clic du bouton commander -------------
+
+const orderButton = document.querySelector('#order');
+orderButton.addEventListener('click', (e) => submitForm(e));
 
 function submitForm(e) {
   e.preventDefault();
@@ -227,90 +214,101 @@ function submitForm(e) {
     return;
   }
 
-  if (firstNameInvalid()) return;
-  if (lastNameInvalid()) return;
-  if (addressInvalid()) return;
-  if (cityInvalid()) return;
-  if (emailInvalid()) return;
+  if (
+    firstNameValid() &&
+    lastNameValid() &&
+    addressValid() &&
+    cityValid() &&
+    emailValid()
+  ) {
+    const body = requestBody();
 
-  // const body = requestBody();
-
-  // fetch('http://localhost:3000/api/products/order', {
-  //   method: 'POST',
-  //   body: JSON.stringify(body),
-  //   headers: { 'Content-Type': 'application/json' },
-  // })
-  //   .then((res) => res.json())
-  //   .then((data) => {
-  //     const orderId = data.orderId;
-  //     window.location.href = '/html/confirmation.html' + '?orderId=' + orderId;
-  //   })
-  //   .catch((err) => console.error(err));
+    fetch('http://localhost:3000/api/products/order', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const orderId = data.orderId;
+        window.location.href =
+          '/html/confirmation.html' + '?orderId=' + orderId;
+      })
+      .catch((err) => console.error(err));
+  }
 }
 
 // véfirication du formulaire ------------------------------
 
-function firstNameInvalid() {
+function firstNameValid() {
   const regex = /^[a-zA-Z-]+$/;
   const firstName = document.querySelector('#firstName');
-  console.log(regex.test(firstName.value));
 
-  if (regex.test(firstName.value) == false) {
+  if (!regex.test(firstName.value)) {
     firstName.nextElementSibling.textContent =
       'Doit contenir uniquement des lettres';
-    return;
+    return false;
+  } else {
+    firstName.nextElementSibling.textContent = '';
+    return true;
   }
 }
 
-function lastNameInvalid() {
+function lastNameValid() {
   const regex = /^[a-zA-Z-]+$/;
   const lastName = document.querySelector('#lastName');
-  console.log(regex.test(lastName.value));
 
-  if (regex.test(lastName.value) == false) {
+  if (!regex.test(lastName.value)) {
     lastName.nextElementSibling.textContent =
       'Doit contenir uniquement des lettres';
-    return;
+    return false;
+  } else {
+    lastName.nextElementSibling.textContent = '';
+    return true;
   }
 }
 
-function addressInvalid() {
+function addressValid() {
   const regex = /^[#.0-9a-zA-Z\s,-]+$/;
   const address = document.querySelector('#address');
-  console.log(regex.test(address.value));
 
-  if (regex.test(address.value) == false) {
+  if (!regex.test(address.value)) {
     address.nextElementSibling.textContent =
       'Doit contenir uniquement des chiffres et des lettres';
-    return;
+    return false;
+  } else {
+    address.nextElementSibling.textContent = '';
+    return true;
   }
 }
 
-function cityInvalid() {
+function cityValid() {
   const regex = /^[a-zA-Z-]+$/;
   const city = document.querySelector('#city');
-  console.log(regex.test(city.value));
 
-  if (regex.test(city.value) == false) {
+  if (!regex.test(city.value)) {
     city.nextElementSibling.textContent =
       'Doit contenir uniquement des lettres, sans caractères spéciaux';
     return false;
+  } else {
+    city.nextElementSibling.textContent = '';
+    return true;
   }
-  return true;
 }
 
 // Vérification si l'email est valide ----------------------
 
-function emailInvalid() {
+function emailValid() {
   const regex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
   const email = document.querySelector('#email');
-  console.log(regex.test(email.value));
 
-  if (regex.test(email.value) == false) {
+  if (!regex.test(email.value)) {
     email.nextElementSibling.textContent = 'Renseigner un email valide';
     return false;
+  } else {
+    email.nextElementSibling.textContent = '';
+    return true;
   }
-  return true;
 }
 
 // Corps du formulaire -------------------------------------
