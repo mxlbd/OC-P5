@@ -15,7 +15,7 @@ fetch(`http://localhost:3000/api/products/`)
   .then((response) => response.json())
   .then((data) => retreiveItemsAndPrice(data));
 
-const itemAndPrice = [];
+let itemAndPrice = [];
 function retreiveItemsAndPrice(data) {
   for (let i = 0; i < cart.length; i++) {
     for (let j = 0; j < data.length; j++) {
@@ -179,7 +179,6 @@ function updateQuantity(id, newQuantity, item) {
   localStorage.setItem(id + '-' + item.color, JSON.stringify(newItem));
   displayTotalQuantity();
   displayTotalPrice(item);
-  // location.reload();
 }
 
 function elementDelete(item) {
@@ -200,6 +199,8 @@ function deleteItem(item) {
   );
   article.remove();
   localStorage.removeItem(`${deleteItem.id}-${deleteItem.color}`);
+  displayTotalQuantity();
+  displayTotalPrice();
   location.reload();
 }
 
