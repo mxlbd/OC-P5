@@ -65,7 +65,13 @@ function displayItems(item) {
 function displayTotalQuantity() {
   let totalQuantity = document.querySelector('#totalQuantity');
 
-  totalQuantity.textContent = document.querySelector('.itemQuantity').value;
+  let value = document.querySelectorAll('.itemQuantity');
+  let total = 0;
+  for (let i = 0; i < value.length; i++) {
+    total += Number(value[i].value);
+  }
+
+  totalQuantity.textContent = total;
 }
 
 function displayTotalPrice() {
