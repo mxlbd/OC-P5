@@ -39,23 +39,23 @@ function retreiveItemsAndPrice(data) {
 }
 
 function displayItems(item) {
-  const article = elementArticle(item);
-  const img = elementImg(item);
+  let article = elementArticle(item);
+  let img = elementImg(item);
   article.appendChild(img);
 
-  const content = elementContent();
+  let content = elementContent();
   article.appendChild(content);
 
-  const description = elementDescription(item);
+  let description = elementDescription(item);
   content.appendChild(description);
 
-  const settings = elementSettings();
+  let settings = elementSettings();
   content.appendChild(settings);
 
-  const quantity = elementQuantity(item);
+  let quantity = elementQuantity(item);
   settings.appendChild(quantity);
 
-  const deleteItem = elementDelete(item);
+  let deleteItem = elementDelete(item);
   settings.appendChild(deleteItem);
 
   displayTotalQuantity();
@@ -63,17 +63,13 @@ function displayItems(item) {
 }
 
 function displayTotalQuantity() {
-  const totalQuantity = document.querySelector('#totalQuantity');
-  let total = 0;
-  for (let i = 0; i < cart.length; i++) {
-    console.log(cart[i]);
-    total += cart[i].quantity;
-  }
-  totalQuantity.textContent = total;
+  let totalQuantity = document.querySelector('#totalQuantity');
+
+  totalQuantity.textContent = document.querySelector('.itemQuantity').value;
 }
 
 function displayTotalPrice() {
-  const totalPrice = document.querySelector('#totalPrice');
+  let totalPrice = document.querySelector('#totalPrice');
   let total = 0;
   for (let i = 0; i < itemAndPrice.length; i++) {
     total += itemAndPrice[i].price * itemAndPrice[i].quantity;
@@ -82,7 +78,7 @@ function displayTotalPrice() {
 }
 
 function elementArticle(item) {
-  const article = document
+  let article = document
     .querySelector('#cart__items')
     .appendChild(document.createElement('article'));
   article.classList.add('cart__item');
@@ -92,8 +88,8 @@ function elementArticle(item) {
 }
 
 function elementImg(item) {
-  const div = document.createElement('div');
-  const img = document.createElement('img');
+  let div = document.createElement('div');
+  let img = document.createElement('img');
   div.appendChild(img);
 
   div.classList.add('cart__item__img');
@@ -111,19 +107,19 @@ function elementImg(item) {
 // quantity: 1
 
 function elementContent() {
-  const div = document.createElement('div');
+  let div = document.createElement('div');
   div.classList.add('cart__item__content');
   return div;
 }
 
 function elementDescription(item) {
-  const div = document.createElement('div');
+  let div = document.createElement('div');
   div.classList.add('cart__item__content__description');
-  const h2 = document.createElement('h2');
+  let h2 = document.createElement('h2');
   h2.textContent = item.name;
-  const p1 = document.createElement('p');
+  let p1 = document.createElement('p');
   p1.textContent = item.color;
-  const p2 = document.createElement('p');
+  let p2 = document.createElement('p');
   p2.textContent = item.price + ' €';
 
   div.appendChild(h2);
@@ -134,17 +130,17 @@ function elementDescription(item) {
 }
 
 function elementSettings() {
-  const div = document.createElement('div');
+  let div = document.createElement('div');
   div.classList.add('cart__item__content__settings');
   return div;
 }
 
 function elementQuantity(item) {
-  const div = document.createElement('div');
+  let div = document.createElement('div');
   div.classList.add('cart__item__content__settings__quantity');
-  const p = document.createElement('p');
+  let p = document.createElement('p');
   p.textContent = 'Qté : ';
-  const input = document.createElement('input');
+  let input = document.createElement('input');
   input.classList.add('itemQuantity');
   input.type = 'number';
   input.name = 'itemQuantity';
@@ -162,10 +158,10 @@ function elementQuantity(item) {
 }
 
 function updateQuantity(id, newQuantity, item) {
-  const itemToUpdate = itemAndPrice.find((item) => item.id === id);
+  let itemToUpdate = itemAndPrice.find((item) => item.id === id);
   itemToUpdate.quantity = Number(newQuantity);
 
-  const newItem = {
+  let newItem = {
     altTxt: itemToUpdate.altTxt,
     color: itemToUpdate.color,
     _id: itemToUpdate.id,
@@ -177,14 +173,14 @@ function updateQuantity(id, newQuantity, item) {
   localStorage.setItem(id + '-' + item.color, JSON.stringify(newItem));
   displayTotalQuantity();
   displayTotalPrice(item);
-  location.reload();
+  // location.reload();
 }
 
 function elementDelete(item) {
-  const div = document.createElement('div');
+  let div = document.createElement('div');
   div.classList.add('cart__item__content__settings__delete');
   div.addEventListener('click', () => deleteItem(item));
-  const p = document.createElement('p');
+  let p = document.createElement('p');
   p.classList.add('deleteItem');
   p.textContent = 'Supprimer';
   div.appendChild(p);
@@ -192,8 +188,8 @@ function elementDelete(item) {
 }
 
 function deleteItem(item) {
-  const deleteItem = item;
-  const article = document.querySelector(
+  let deleteItem = item;
+  let article = document.querySelector(
     `article[data-id="${deleteItem.id}"][data-color="${deleteItem.color}"]`
   );
   article.remove();
@@ -203,7 +199,7 @@ function deleteItem(item) {
 
 // Envoi du formulaire au backend au clic du bouton commander -------------
 
-const orderButton = document.querySelector('#order');
+let orderButton = document.querySelector('#order');
 orderButton.addEventListener('click', (e) => submitForm(e));
 
 function submitForm(e) {
@@ -221,7 +217,7 @@ function submitForm(e) {
     cityValid() &&
     emailValid()
   ) {
-    const body = requestBody();
+    let body = requestBody();
 
     fetch('http://localhost:3000/api/products/order', {
       method: 'POST',
@@ -230,7 +226,7 @@ function submitForm(e) {
     })
       .then((res) => res.json())
       .then((data) => {
-        const orderId = data.orderId;
+        let orderId = data.orderId;
         window.location.href =
           '/html/confirmation.html' + '?orderId=' + orderId;
       })
@@ -241,8 +237,8 @@ function submitForm(e) {
 // véfirication du formulaire ------------------------------
 
 function firstNameValid() {
-  const regex = /^[a-zA-Z-]+$/;
-  const firstName = document.querySelector('#firstName');
+  let regex = /^[a-zA-Z-]+$/;
+  let firstName = document.querySelector('#firstName');
 
   if (!regex.test(firstName.value)) {
     firstName.nextElementSibling.textContent =
@@ -255,8 +251,8 @@ function firstNameValid() {
 }
 
 function lastNameValid() {
-  const regex = /^[a-zA-Z-]+$/;
-  const lastName = document.querySelector('#lastName');
+  let regex = /^[a-zA-Z-]+$/;
+  let lastName = document.querySelector('#lastName');
 
   if (!regex.test(lastName.value)) {
     lastName.nextElementSibling.textContent =
@@ -269,8 +265,8 @@ function lastNameValid() {
 }
 
 function addressValid() {
-  const regex = /^[#.0-9a-zA-Z\s,-]+$/;
-  const address = document.querySelector('#address');
+  let regex = /^[#.0-9a-zA-Z\s,-]+$/;
+  let address = document.querySelector('#address');
 
   if (!regex.test(address.value)) {
     address.nextElementSibling.textContent =
@@ -283,8 +279,8 @@ function addressValid() {
 }
 
 function cityValid() {
-  const regex = /^[a-zA-Z-]+$/;
-  const city = document.querySelector('#city');
+  let regex = /^[a-zA-Z-]+$/;
+  let city = document.querySelector('#city');
 
   if (!regex.test(city.value)) {
     city.nextElementSibling.textContent =
@@ -299,8 +295,8 @@ function cityValid() {
 // Vérification si l'email est valide ----------------------
 
 function emailValid() {
-  const regex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
-  const email = document.querySelector('#email');
+  let regex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
+  let email = document.querySelector('#email');
 
   if (!regex.test(email.value)) {
     email.nextElementSibling.textContent = 'Renseigner un email valide';
@@ -314,7 +310,7 @@ function emailValid() {
 // Corps du formulaire -------------------------------------
 
 function requestBody() {
-  const form = document.querySelector('.cart__order__form');
+  let form = document.querySelector('.cart__order__form');
 
   const firstName = form.elements.firstName.value;
   const lastName = form.elements.lastName.value;
@@ -338,11 +334,11 @@ function requestBody() {
 // Donne à requestBody tous les ids du panier --------------
 
 function idsToCache() {
-  const numberItems = localStorage.length;
+  let numberItems = localStorage.length;
   const ids = [];
   for (let i = 0; i < numberItems; i++) {
-    const key = localStorage.key(i);
-    const id = key.split('-')[0];
+    let key = localStorage.key(i);
+    let id = key.split('-')[0];
     ids.push(id);
   }
   return ids;
